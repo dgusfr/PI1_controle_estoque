@@ -1,10 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_wtf.csrf import CSRFProtect 
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 import os 
-
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -16,12 +15,15 @@ def create_app(config_class=Config):
 
     Args:
         config_class (object): A classe de configuração a ser usada.
-                               Default para a classe Config de config.py.
+                               Defaulta para a classe Config de config.py.
     """
     app = Flask(__name__)
 
+    # Carrega as configurações definidas na classe Config
     app.config.from_object(config_class)
 
+    # Cria o diretório 'database' se ele não existir.
+    # Isso garante que o SQLAlchemy tenha onde colocar o arquivo estoque.db
     database_dir = os.path.join(app.root_path, 'database')
     if not os.path.exists(database_dir):
         os.makedirs(database_dir)
@@ -29,11 +31,11 @@ def create_app(config_class=Config):
     # Vincula as extensões à instância da aplicação Flask
     db.init_app(app)
     login_manager.init_app(app)
-    csrf.init_app(app) # Inicializa CSRFProtect com a aplicação
+    csrf.init_app(app)
 
     # Configurações adicionais para o Flask-Login
-    login_manager.login_view = 'auth.login' # Define a rota para a página de login
-    login_manager.login_message_category = 'info' # Categoria da mensagem flash (opcional)
+    login_manager.login_view = 'auth.login' 
+    login_manager.login_message_category = 'info'
 
     # Importa e registra os blueprints (onde as rotas e a lógica estarão)
     # Faremos isso em arquivos separados para organizar o código.
@@ -66,6 +68,7 @@ def create_app(config_class=Config):
 
     # Um exemplo de rota simples para a página inicial (ainda não usaremos blueprints aqui)
     # Depois podemos mover isso para um blueprint 'main' ou 'dashboard'
+
     # from flask import render_template
     # @app.route('/')
     # def index():
@@ -73,6 +76,3 @@ def create_app(config_class=Config):
 
     return app
 
-# Nota: Com a estrutura de fábrica (create_app), não criamos a instância 'app'
-# diretamente neste arquivo, apenas definimos a função que a cria.
-# O arquivo run.py chamará create_app() para obter a instância.
