@@ -5,11 +5,10 @@ from flask_wtf.csrf import CSRFProtect
 from config import Config
 import os 
 
-# Inicializa as extensões, mas sem vincular a uma aplicação Flask ainda
-# Isso permite criar a aplicação em uma função (create_app)
+
 db = SQLAlchemy()
 login_manager = LoginManager()
-csrf = CSRFProtect() # Inicializa CSRFProtect
+csrf = CSRFProtect() 
 
 def create_app(config_class=Config):
     """
