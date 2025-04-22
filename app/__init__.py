@@ -16,15 +16,12 @@ def create_app(config_class=Config):
 
     Args:
         config_class (object): A classe de configuração a ser usada.
-                               Defaulta para a classe Config de config.py.
+                               Default para a classe Config de config.py.
     """
     app = Flask(__name__)
 
-    # Carrega as configurações definidas na classe Config
     app.config.from_object(config_class)
 
-    # Cria o diretório 'database' se ele não existir.
-    # Isso garante que o SQLAlchemy tenha onde colocar o arquivo estoque.db
     database_dir = os.path.join(app.root_path, 'database')
     if not os.path.exists(database_dir):
         os.makedirs(database_dir)
