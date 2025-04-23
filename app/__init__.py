@@ -37,9 +37,8 @@ def create_app(config_class=Config):
     login_manager.login_view = 'auth.login' 
     login_manager.login_message_category = 'info'
 
+
     # Importa e registra os blueprints (onde as rotas e a lógica estarão)
-    # Faremos isso em arquivos separados para organizar o código.
-    # Por exemplo, vamos criar um blueprint para autenticação (auth)
     from app.routes.auth import auth as auth_bp
     app.register_blueprint(auth_bp)
 
