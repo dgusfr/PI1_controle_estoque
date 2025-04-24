@@ -38,13 +38,19 @@ def create_app(config_class=Config):
     login_manager.login_message_category = 'info'
 
 
+
     # Importa e registra os blueprints (onde as rotas e a lógica estarão)
     from app.routes.auth import auth as auth_bp
     app.register_blueprint(auth_bp)
 
-    # Importa e registra o blueprint principal (dashboard, rotas gerais)
     from app.routes.main import main as main_bp
-    app.register_blueprint(main_bp) # Não precisa de url_prefix aqui, pois a rota '/' é raiz
+    app.register_blueprint(main_bp)
+
+    # Importa e registra o blueprint de estoque/produtos
+    from app.routes.estoque import estoque as estoque_bp
+    app.register_blueprint(estoque_bp, url_prefix='/estoque') # Note o url_prefix aqui
+
+    # ... (configuração user_loader e outras coisas) ...
 
     # Adicionar outros blueprints aqui conforme avançamos (estoque, vendas, etc.)
     # from app.routes.estoque import estoque as estoque_bp
