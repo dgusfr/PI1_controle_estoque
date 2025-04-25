@@ -1,52 +1,65 @@
+# app/routes/estoque.py
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required
+# Importa ProductForm
+from app.forms import ProductForm
 from app.models import Product, Category, Supplier # Importa os modelos necessários
 from app import db # Importa a instância do SQLAlchemy
+from datetime import datetime # Para a data da última atualização
 
 # Cria uma instância de Blueprint para as rotas de estoque/produtos
-# url_prefix='/estoque' significa que todas as rotas neste blueprint
-# começarão com /estoque (ex: /estoque/produtos)
 estoque = Blueprint('estoque', __name__, url_prefix='/estoque')
 
 @estoque.route('/produtos')
-@login_required # Esta rota exige que o usuário esteja autenticado
+@login_required
 def listar_produtos():
     """
     Rota para listar todos os produtos cadastrados em uma tabela.
     """
-    # Consulta todos os produtos no banco de dados
-    # Usamos .all() para obter uma lista de objetos Product
-    # Podemos adicionar .order_by(Product.name) para ordenar por nome, por exemplo
     produtos = Product.query.all()
-
-    # Renderiza o template de listagem de produtos, passando a lista de produtos para ele
     return render_template('estoque/produtos.html', title='Listar Produtos', produtos=produtos)
 
-# --- Futuras rotas para adicionar, editar, excluir produtos aqui ---
+@estoque.route('/produtos/novo', methods=['GET', 'POST'])
+@login_required
+def adicionar_produto():
+    """
+    Rota para adicionar um novo produto.
+    Exibe o formulário (GET) ou processa o cadastro (POST).
+    """
+    form = ProductForm() # Cria uma instância do formulário de produto
 
-# Exemplo de rota para adicionar produto (apenas esqueleto por enquanto)
-# @estoque.route('/produtos/novo', methods=['GET', 'POST'])
-# @login_required
-# def adicionar_produto():
-#     # form = ProductForm() # Precisamos criar este formulário depois
-#     # ... lógica para adicionar ...
-#     return render_template('estoque/adicionar_produto.html', title='Novo Produto', form=None) # Trocar None pelo form real
+    # Note que os QuerySelectFields no formulário (categoria e fornecedor)
+    # já vêm populados automaticamente pelo QuerySelectField ao criar a instância do form,
+    # pois definimos as query_factories lá em forms.py.
+    # Não precisamos popular form.campo.choices aqui explicitamente para QuerySelectField.
 
-# Exemplo de rota para editar produto (apenas esqueleto por enquanto)
-# @estoque.route('/produtos/editar/<int:product_id>', methods=['GET', 'POST'])
-# @login_required
-# def editar_produto(product_id):
-#     # product = Product.query.get_or_404(product_id) # Busca o produto pelo ID
-#     # form = ProductForm(obj=product) # Preenche o formulário com os dados do produto
-#     # ... lógica para editar ...
-#     return render_template('estoque/editar_produto.html', title='Editar Produto', form=None) # Trocar None pelo form real
+    # Se o formulário for enviado (POST) e for válido
+    if form.validate_on_submit():
+        # Cria uma nova instância do modelo Product
+        novo_produto = Product(
+            code=form.code.data,
+            name=form.name.data,
+            price=form.price.data, # DecimalField retorna um objeto Decimal
+            quantity_in_stock=form.quantity_in_stock.data,
+            minimum_stock=form.minimum_stock.data if form.minimum_stock.data is not None else 0, # Lida com Optional
+            # QuerySelectField retorna o objeto modelo selecionado (ou None se 'allow_blank=True' e nada for selecionado)
+            category=form.category.data,
+            supplier=form.supplier.data,
+            last_updated=datetime.utcnow() # Define a data/hora atual
+        )
 
-# Exemplo de rota para excluir produto (apenas esqueleto por enquanto)
-# @estoque.route('/produtos/excluir/<int:product_id>', methods=['POST'])
-# @login_required
-# def excluir_produto(product_id):
-#     # product = Product.query.get_or_404(product_id)
-#     # db.session.delete(product)
-#     # db.session.commit()
-#     # flash('Produto excluído com sucesso!', 'success')
-#     return redirect(url_for('estoque.listar_produtos'))
+        # Adiciona o novo produto à sessão do banco de dados
+        db.session.add(novo_produto)
+        # Salva as mudanças no banco de dados
+        db.session.commit()
+
+        flash(f'Produto "{novo_produto.name}" cadastrado com sucesso!', 'success')
+        # Redireciona para a página de listagem de produtos
+        return redirect(url_for('estoque.listar_produtos'))
+
+    # Se a requisição for GET ou o formulário não for válido, renderiza o template com o formulário
+    # Os erros de validação do formulário serão exibidos automaticamente no template onde os campos do form forem renderizados
+    return render_template('estoque/adicionar_produto.html', title='Adicionar Novo Produto', form=form)
+
+# --- Futuras rotas para editar, excluir produtos aqui ---
