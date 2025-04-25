@@ -88,6 +88,24 @@
         {% endwith %}
 
         {# Bloco onde o conteúdo específico de cada página filha será inserido #}
+        {% if current_user.is_authenticated %}
+                         <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEstoque" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Estoque
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownEstoque">
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.listar_produtos') }}">Listar Produtos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.adicionar_produto') }}">Adicionar Produto</a></li> {# Link para adicionar produto #}
+                                <li><hr class="dropdown-divider"></li> {# Linha divisória #}
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.listar_categorias') }}">Listar Categorias</a></li> {# Link para listar categorias #}
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.adicionar_categoria') }}">Adicionar Categoria</a></li> {# Link para adicionar categoria #}
+                                <li><hr class="dropdown-divider"></li> {# Outra linha divisória #}
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.listar_fornecedores') }}">Listar Fornecedores</a></li> {# Link para listar fornecedores #}
+                                <li><a class="dropdown-item" href="{{ url_for('estoque.adicionar_fornecedor') }}">Adicionar Fornecedor</a></li> {# Link para adicionar fornecedor #}
+                            </ul>
+                        </li>
+                        {# Adicionar outros menus dropdown para Vendas, Relatórios, etc. #}
+                    {% endif %}
         {% block content %}{% endblock %}
     </div>
 
