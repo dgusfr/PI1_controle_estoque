@@ -1,0 +1,33 @@
+{# app/templates/estoque/adicionar_fornecedor.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <form method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            {% for error in form.name.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="mb-3">
+            {{ form.contact_info.label(class="form-label") }}
+            {{ form.contact_info(class="form-control", rows=4) }} {# rows=4 para TextArea #}
+            {% for error in form.contact_info.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('estoque.listar_fornecedores') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}
