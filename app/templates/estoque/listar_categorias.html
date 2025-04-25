@@ -1,0 +1,56 @@
+{# app/templates/estoque/listar_categorias.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{# Inclua CSS específico para DataTables aqui se quiser #}
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    {# Botão para adicionar nova categoria #}
+    <a href="{{ url_for('estoque.adicionar_categoria') }}" class="btn btn-primary mb-3">Adicionar Nova Categoria</a>
+
+    <table id="categoriasTable" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Ações</th> {# Coluna para botões de Editar/Excluir #}
+            </tr>
+        </thead>
+        <tbody>
+            {# Loop através da lista de categorias #}
+            {% for categoria in categorias %}
+                <tr>
+                    <td>{{ categoria.id }}</td>
+                    <td>{{ categoria.name }}</td>
+                    <td>
+                        {# Botões de Ação (Editar/Excluir) - apenas esqueletos por enquanto #}
+                        {# <a href="{{ url_for('estoque.editar_categoria', category_id=categoria.id) }}" class="btn btn-sm btn-outline-primary">Editar</a> #}
+                        {# <form action="{{ url_for('estoque.excluir_categoria', category_id=categoria.id) }}" method="post" style="display:inline;"> #}
+                        {#     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja excluir esta categoria?');">Excluir</button> #}
+                        {# </form> #}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{# Inclua JS para jQuery e DataTables aqui se quiser a funcionalidade #}
+{% block scripts %}
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready( function () {
+            $('#categoriasTable').DataTable({
+                 "language": { "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/Portuguese-Brasil.json" }
+            });
+        } );
+    </script>
+{% endblock %}
