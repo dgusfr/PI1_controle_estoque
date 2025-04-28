@@ -1,4 +1,3 @@
-# Ignorar o diretório do ambiente virtual
 venv/
 
 # Ignorar arquivos bytecode do Python
