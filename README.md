@@ -292,4 +292,4 @@ Este projeto é para fins educacionais, desenvolvido no contexto de uma discipli
 ## 12. Autor
 
 Desenvolvido por
-Orientação/Contexto: Disciplina de Projetos Integrador 1
+Orientação/Contexto: Disciplina de Projeto Integrador 1
