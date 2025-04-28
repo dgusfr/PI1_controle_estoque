@@ -146,3 +146,13 @@ def adicionar_fornecedor():
         flash(f'Fornecedor "{novo_fornecedor.name}" cadastrado com sucesso!', 'success')
         return redirect(url_for('estoque.listar_fornecedores'))
     return render_template('estoque/adicionar_fornecedor.html', title='Adicionar Novo Fornecedor', form=form)
+
+@estoque.route('/produtos')
+@login_required
+def listar_produtos():
+    """Rota para listar todos os produtos."""
+    produtos = Product.query.all()
+    # Cria uma instância de um formulário simples (sem campos visíveis) apenas para gerar o token CSRF para o formulário de exclusão
+    form_exclusao = FlaskForm()
+    # Passa o formulário para o template
+    return render_template('estoque/produtos.html', title='Listar Produtos', produtos=produtos, form=form_exclusao)
