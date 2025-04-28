@@ -1,0 +1,35 @@
+# Ignorar o diretório do ambiente virtual
+venv/
+
+# Ignorar arquivos bytecode do Python
+__pycache__/
+*.pyc
+
+# Ignorar o diretório do banco de dados SQLite
+# O arquivo estoque.db estará aqui e não deve ser versionado
+database/
+
+# Ignorar arquivo de variáveis de ambiente local
+# Pode conter chaves secretas ou configurações de banco de dados locais
+.env
+
+# Ignorar arquivos específicos de sistemas operacionais e editores
+.DS_Store       # macOS
+Thumbs.db       # Windows
+ehthumbs.db     # Windows
+*.swp           # Vim swap files
+*.swo           # Vim swap files
+.idea/          # JetBrains IDEs (PyCharm)
+.vscode/        # VS Code settings
+
+# Ignorar arquivos de testes e coverage (se usar futuramente)
+.coverage
+htmlcov/
+
+# Ignorar logs (se você criar arquivos de log)
+*.log
+
+# Ignorar arquivos gerados por ferramentas de build ou empacotamento
+dist/
+build/
+*.egg-info/
