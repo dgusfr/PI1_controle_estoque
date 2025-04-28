@@ -1,5 +1,3 @@
-# app/routes/estoque.py
-
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort # Importar abort
 from flask_login import login_required
 from app.forms import ProductForm, CategoryForm, SupplierForm
