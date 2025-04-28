@@ -5,11 +5,9 @@ __pycache__/
 *.pyc
 
 # Ignorar o diretório do banco de dados SQLite
-# O arquivo estoque.db estará aqui e não deve ser versionado
 database/
 
 # Ignorar arquivo de variáveis de ambiente local
-# Pode conter chaves secretas ou configurações de banco de dados locais
 .env
 
 # Ignorar arquivos específicos de sistemas operacionais e editores
