@@ -1,4 +1,3 @@
-
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from flask_login import login_required
 # Importar FlaskForm para o formulário simples na listagem (se ainda não estiver)
