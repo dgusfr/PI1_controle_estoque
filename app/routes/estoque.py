@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from flask_login import login_required
-# Importar FlaskForm para o formulário simples na listagem (se ainda não estiver)
 from flask_wtf import FlaskForm
 from app.forms import ProductForm, CategoryForm, SupplierForm
 from app.models import Product, Category, Supplier
