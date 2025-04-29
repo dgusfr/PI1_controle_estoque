@@ -2,9 +2,8 @@
 
 {% extends 'base.html' %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title %}{% endblock %}
 
-{# Inclua CSS específico para DataTables aqui se quiser #}
 {% block styles %}
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 {% endblock %}
@@ -30,11 +29,15 @@
                     <td>{{ categoria.id }}</td>
                     <td>{{ categoria.name }}</td>
                     <td>
-                        {# Botões de Ação (Editar/Excluir) - apenas esqueletos por enquanto #}
-                        {# <a href="{{ url_for('estoque.editar_categoria', category_id=categoria.id) }}" class="btn btn-sm btn-outline-primary">Editar</a> #}
-                        {# <form action="{{ url_for('estoque.excluir_categoria', category_id=categoria.id) }}" method="post" style="display:inline;"> #}
-                        {#     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja excluir esta categoria?');">Excluir</button> #}
-                        {# </form> #}
+                        {# Botão/Link de Ação Editar #}
+                        <a href="{{ url_for('estoque.editar_categoria', category_id=categoria.id) }}" class="btn btn-sm btn-outline-primary me-1">Editar</a>
+
+                        {# Botão de Ação Excluir (usando um formulário POST para segurança) #}
+                        <form action="{{ url_for('estoque.excluir_categoria', category_id=categoria.id) }}" method="post" style="display:inline;">
+                             {# Inclui o campo oculto para o token CSRF #}
+                            {{ form.hidden_tag() }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja excluir a categoria {{ categoria.name }}?');">Excluir</button>
+                        </form>
                     </td>
                 </tr>
             {% endfor %}
@@ -42,7 +45,6 @@
     </table>
 {% endblock %}
 
-{# Inclua JS para jQuery e DataTables aqui se quiser a funcionalidade #}
 {% block scripts %}
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
