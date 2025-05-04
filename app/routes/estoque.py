@@ -1,5 +1,3 @@
-# app/routes/estoque.py
-
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from flask_login import login_required
 from flask_wtf import FlaskForm # Importar FlaskForm se usado em listagens
