@@ -1,0 +1,52 @@
+{# app/templates/estoque/movimentar_estoque.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}{{ title %}{% endblock %}
+
+{% block content %}
+    {# Título dinâmico #}
+    <h1>Registrar {% if movement_type == 'entrada' %}Entrada{% else %}Saída{% endif %} de Estoque</h1>
+
+    {# Formulário de movimentação #}
+    <form method="post">
+        {{ form.hidden_tag() }} {# Inclui o token CSRF e o campo oculto movement_type #}
+
+        {# Campo Produto #}
+        <div class="mb-3">
+            {{ form.product.label(class="form-label") }}
+            {{ form.product(class="form-select") }}
+            {% for error in form.product.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Campo Quantidade #}
+        <div class="mb-3">
+            {{ form.quantity.label(class="form-label") }}
+            {{ form.quantity(class="form-control") }}
+            {% for error in form.quantity.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Campo Motivo (condicionalmente exibido ou com label ajustado para saída) #}
+        {# Note: A validação de obrigatoriedade já está no formulário StockMovementForm #}
+        <div class="mb-3">
+            {{ form.reason.label(class="form-label") }} {# O label já é "Motivo (obrigatório para saídas)" #}
+            {{ form.reason(class="form-control", rows=3) }}
+             {% for error in form.reason.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# O campo movement_type é HiddenField, então não precisa ser renderizado explicitamente aqui #}
+        {# {{ form.movement_type() }} #}
+
+
+        {{ form.submit(class="btn btn-primary") }}
+        {# Botão cancelar que volta para a listagem de produtos #}
+        <a href="{{ url_for('estoque.listar_produtos') }}" class="btn btn-secondary">Cancelar</a>
+
+    </form>
+{% endblock %}
