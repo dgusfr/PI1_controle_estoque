@@ -1,8 +1,11 @@
+# app/routes/estoque.py
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from flask_login import login_required
-from flask_wtf import FlaskForm
-from app.forms import ProductForm, CategoryForm, SupplierForm
-from app.models import Product, Category, Supplier
+from flask_wtf import FlaskForm # Importar FlaskForm se usado em listagens
+# Importar StockMovementForm
+from app.forms import ProductForm, CategoryForm, SupplierForm, StockMovementForm
+from app.models import Product, Category, Supplier, StockMovement # Importar StockMovement
 from app import db
 from datetime import datetime
 
@@ -10,192 +13,107 @@ from datetime import datetime
 estoque = Blueprint('estoque', __name__, url_prefix='/estoque')
 
 # --- Rotas de Produtos (existente) ---
-@estoque.route('/produtos')
-@login_required
-def listar_produtos():
-    """Rota para listar todos os produtos."""
-    produtos = Product.query.all()
-    form_exclusao = FlaskForm() # Para o botão excluir POST
-    return render_template('estoque/produtos.html', title='Listar Produtos', produtos=produtos, form=form_exclusao)
+# ... listar_produtos, adicionar_produto, editar_produto, excluir_produto ...
 
-@estoque.route('/produtos/novo', methods=['GET', 'POST'])
+# --- Rotas de Categoria (existente) ---
+# ... listar_categorias, adicionar_categoria, editar_categoria, excluir_categoria ...
+
+# --- Rotas de Fornecedor (existente) ---
+# ... listar_fornecedores, adicionar_fornecedor, editar_fornecedor, excluir_fornecedor ...
+
+
+# --- Novas Rotas para Movimentação de Estoque (RF04, RF05) ---
+
+@estoque.route('/movimentar/entrada', methods=['GET', 'POST'])
 @login_required
-def adicionar_produto():
-    """Rota para adicionar um novo produto."""
-    form = ProductForm()
+def movimentar_entrada():
+    """
+    Rota para registrar uma ENTRADA de estoque.
+    """
+    form = StockMovementForm()
+    # Define o tipo de movimento no campo oculto do formulário
+    form.movement_type.data = 'entrada'
+
     if form.validate_on_submit():
-        # ... lógica de adicionar produto ...
-        novo_produto = Product(
-            code=form.code.data,
-            name=form.name.data,
-            price=form.price.data,
-            quantity_in_stock=form.quantity_in_stock.data,
-            minimum_stock=form.minimum_stock.data if form.minimum_stock.data is not None else 0,
-            category=form.category.data,
-            supplier=form.supplier.data,
-            last_updated=datetime.utcnow()
+        # Busca o produto selecionado (o QuerySelectField.data já é o objeto)
+        produto = form.product.data
+        quantidade_movimentada = form.quantity.data
+
+        # Atualiza a quantidade em estoque do produto (adiciona)
+        produto.quantity_in_stock += quantidade_movimentada
+        produto.last_updated = datetime.utcnow() # Atualiza data de modificação
+
+        # Cria um novo registro de movimentação
+        movimentacao = StockMovement(
+            date=datetime.utcnow(),
+            movement_type='entrada',
+            quantity=quantidade_movimentada,
+            # O motivo é opcional para entradas, então pode ser None
+            reason=form.reason.data if form.reason.data else None,
+            product=produto # Associa a movimentação ao produto
         )
-        db.session.add(novo_produto)
-        db.session.commit()
-        flash(f'Produto "{novo_produto.name}" cadastrado com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_produtos'))
-    return render_template('estoque/adicionar_produto.html', title='Adicionar Novo Produto', form=form)
 
-@estoque.route('/produtos/editar/<int:product_id>', methods=['GET', 'POST'])
+        # Adiciona as mudanças (produto atualizado e nova movimentação) à sessão
+        db.session.add(produto) # O SQLAlchemy já rastreia o produto se ele veio de uma query, mas adicionar explicitamente não faz mal
+        db.session.add(movimentacao)
+        # Salva tudo no banco
+        db.session.commit()
+
+        flash(f'Entrada de {quantidade_movimentada} unidades de "{produto.name}" registrada com sucesso!', 'success')
+        # Redireciona para a listagem de produtos ou para uma página de histórico de movimentação
+        return redirect(url_for('estoque.listar_produtos')) # Podemos criar uma rota para histórico depois
+
+    # Se a requisição for GET ou validação falhar, renderiza o template
+    # Passamos o tipo de movimento e o formulário para o template
+    return render_template('estoque/movimentar_estoque.html', title='Registrar Entrada de Estoque', form=form, movement_type='entrada')
+
+
+@estoque.route('/movimentar/saida', methods=['GET', 'POST'])
 @login_required
-def editar_produto(product_id):
-    """Rota para editar um produto existente."""
-    produto = Product.query.get_or_404(product_id)
-    form = ProductForm(obj=produto)
+def movimentar_saida():
+    """
+    Rota para registrar uma SAÍDA de estoque.
+    """
+    form = StockMovementForm()
+    # Define o tipo de movimento no campo oculto do formulário
+    form.movement_type.data = 'saida'
+
     if form.validate_on_submit():
-        # ... lógica de editar produto ...
-        form.populate_obj(produto)
-        produto.last_updated = datetime.utcnow()
+        # Busca o produto selecionado
+        produto = form.product.data
+        quantidade_movimentada = form.quantity.data
+
+        # A validação de quantidade suficiente já foi feita no validador customizado do formulário,
+        # mas podemos adicionar uma verificação extra aqui por segurança, se desejar.
+        if quantidade_movimentada > produto.quantity_in_stock:
+             flash(f'Erro: Quantidade de saída ({quantidade_movimentada}) maior que o estoque disponível ({produto.quantity_in_stock}) para "{produto.name}".', 'danger')
+             # Retorna para a página, permitindo ao usuário corrigir o formulário
+             return render_template('estoque/movimentar_estoque.html', title='Registrar Saída de Estoque', form=form, movement_type='saida')
+
+
+        # Atualiza a quantidade em estoque do produto (subtrai)
+        produto.quantity_in_stock -= quantidade_movimentada
+        produto.last_updated = datetime.utcnow() # Atualiza data de modificação
+
+        # Cria um novo registro de movimentação
+        movimentacao = StockMovement(
+            date=datetime.utcnow(),
+            movement_type='saida',
+            quantity=quantidade_movimentada,
+            # O motivo é obrigatório para saídas (validado no formulário)
+            reason=form.reason.data, # reason.data já vem validado como não vazio para saídas
+            product=produto # Associa a movimentação ao produto
+        )
+
+        # Adiciona as mudanças (produto atualizado e nova movimentação) à sessão
+        db.session.add(produto)
+        db.session.add(movimentacao)
+        # Salva tudo no banco
         db.session.commit()
-        flash(f'Produto "{produto.name}" atualizado com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_produtos'))
-    return render_template('estoque/editar_produto.html', title='Editar Produto', form=form, produto=produto) # Passar 'produto' é opcional, mas útil
 
-@estoque.route('/produtos/excluir/<int:product_id>', methods=['POST'])
-@login_required
-def excluir_produto(product_id):
-    """Rota para excluir um produto existente."""
-    produto = Product.query.get_or_404(product_id)
-    db.session.delete(produto)
-    db.session.commit()
-    flash(f'Produto "{produto.name}" excluído com sucesso.', 'info')
-    return redirect(url_for('estoque.listar_produtos'))
+        flash(f'Saída de {quantidade_movimentada} unidades de "{produto.name}" registrada com sucesso!', 'success')
+        # Redireciona para a listagem de produtos ou para uma página de histórico
+        return redirect(url_for('estoque.listar_produtos')) # Podemos criar uma rota para histórico depois
 
-
-# --- Rotas de Categoria (existente e novas) ---
-
-@estoque.route('/categorias')
-@login_required
-def listar_categorias():
-    """Rota para listar todas as categorias."""
-    categorias = Category.query.order_by(Category.name).all()
-    form_exclusao = FlaskForm() # Para o botão excluir POST
-    return render_template('estoque/listar_categorias.html', title='Listar Categorias', categorias=categorias, form=form_exclusao) # Passar o form
-
-@estoque.route('/categorias/novo', methods=['GET', 'POST'])
-@login_required
-def adicionar_categoria():
-    """Rota para adicionar nova categoria."""
-    form = CategoryForm()
-    if form.validate_on_submit():
-        # ... lógica de adicionar categoria ...
-        nova_categoria = Category(name=form.name.data)
-        db.session.add(nova_categoria)
-        db.session.commit()
-        flash(f'Categoria "{nova_categoria.name}" cadastrada com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_categorias'))
-    return render_template('estoque/adicionar_categoria.html', title='Adicionar Nova Categoria', form=form)
-
-# --- Nova Rota para Edição de Categoria ---
-@estoque.route('/categorias/editar/<int:category_id>', methods=['GET', 'POST'])
-@login_required
-def editar_categoria(category_id):
-    """
-    Rota para editar uma categoria existente.
-    """
-    categoria = Category.query.get_or_404(category_id)
-    # Passamos o objeto 'categoria' para preencher o formulário
-    form = CategoryForm(obj=categoria)
-    if form.validate_on_submit():
-        # Atualiza o objeto 'categoria' com os dados do formulário
-        form.populate_obj(categoria)
-        db.session.commit()
-        flash(f'Categoria "{categoria.name}" atualizada com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_categorias'))
-    # No método GET, renderiza o formulário preenchido
-    return render_template('estoque/editar_categoria.html', title='Editar Categoria', form=form, categoria=categoria)
-
-
-# --- Nova Rota para Exclusão de Categoria ---
-@estoque.route('/categorias/excluir/<int:category_id>', methods=['POST'])
-@login_required
-def excluir_categoria(category_id):
-    """
-    Rota para excluir uma categoria existente.
-    Aceita apenas requisições POST.
-    """
-    categoria = Category.query.get_or_404(category_id)
-
-    # TODO: Considerar o que fazer com produtos que usam esta categoria antes de excluir
-    # Por exemplo: impedir exclusão se houver produtos associados, ou definir produtos para 'N/A' categoria.
-    # Por enquanto, SQLAlchemy pode impedir a exclusão (devido à ForeignKey) se houver produtos.
-
-    db.session.delete(categoria)
-    db.session.commit()
-    flash(f'Categoria "{categoria.name}" excluída com sucesso.', 'info')
-    return redirect(url_for('estoque.listar_categorias'))
-
-
-# --- Rotas de Fornecedor (existente e novas) ---
-
-@estoque.route('/fornecedores')
-@login_required
-def listar_fornecedores():
-    """Rota para listar todos os fornecedores."""
-    fornecedores = Supplier.query.order_by(Supplier.name).all()
-    form_exclusao = FlaskForm() # Para o botão excluir POST
-    return render_template('estoque/listar_fornecedores.html', title='Listar Fornecedores', fornecedores=fornecedores, form=form_exclusao) # Passar o form
-
-
-@estoque.route('/fornecedores/novo', methods=['GET', 'POST'])
-@login_required
-def adicionar_fornecedor():
-    """Rota para adicionar novo fornecedor."""
-    form = SupplierForm()
-    if form.validate_on_submit():
-        # ... lógica de adicionar fornecedor ...
-        novo_fornecedor = Supplier(
-            name=form.name.data,
-            contact_info=form.contact_info.data if form.contact_info.data else None
-            )
-        db.session.add(novo_fornecedor)
-        db.session.commit()
-        flash(f'Fornecedor "{novo_fornecedor.name}" cadastrado com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_fornecedores'))
-    return render_template('estoque/adicionar_fornecedor.html', title='Adicionar Novo Fornecedor', form=form)
-
-
-# --- Nova Rota para Edição de Fornecedor ---
-@estoque.route('/fornecedores/editar/<int:supplier_id>', methods=['GET', 'POST'])
-@login_required
-def editar_fornecedor(supplier_id):
-    """
-    Rota para editar um fornecedor existente.
-    """
-    fornecedor = Supplier.query.get_or_404(supplier_id)
-    # Passamos o objeto 'fornecedor' para preencher o formulário
-    form = SupplierForm(obj=fornecedor)
-    if form.validate_on_submit():
-        # Atualiza o objeto 'fornecedor' com os dados do formulário
-        form.populate_obj(fornecedor)
-        db.session.commit()
-        flash(f'Fornecedor "{fornecedor.name}" atualizado com sucesso!', 'success')
-        return redirect(url_for('estoque.listar_fornecedores'))
-    # No método GET, renderiza o formulário preenchido
-    return render_template('estoque/editar_fornecedor.html', title='Editar Fornecedor', form=form, fornecedor=fornecedor)
-
-# --- Nova Rota para Exclusão de Fornecedor ---
-@estoque.route('/fornecedores/excluir/<int:supplier_id>', methods=['POST'])
-@login_required
-def excluir_fornecedor(supplier_id):
-    """
-    Rota para excluir um fornecedor existente.
-    Aceita apenas requisições POST.
-    """
-    fornecedor = Supplier.query.get_or_404(supplier_id)
-
-    # TODO: Considerar o que fazer com produtos que usam este fornecedor antes de excluir
-    # Por exemplo: impedir exclusão se houver produtos associados, ou definir produtos para 'N/A' fornecedor.
-    # Por enquanto, SQLAlchemy pode impedir a exclusão (devido à ForeignKey) se houver produtos.
-
-    db.session.delete(fornecedor)
-    db.session.commit()
-    flash(f'Fornecedor "{fornecedor.name}" excluído com sucesso.', 'info')
-    return redirect(url_for('estoque.listar_fornecedores'))
-
-# --- Futuras rotas para movimentações de estoque, vendas, relatórios aqui ---
+    # Se a requisição for GET ou validação falhar, renderiza o template
+    return render_template('estoque/movimentar_estoque.html', title='Registrar Saída de Estoque', form=form, movement_type='saida')
