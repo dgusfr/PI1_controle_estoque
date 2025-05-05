@@ -35,9 +35,9 @@ O sistema permitirá gerenciar produtos, registrar movimentações de estoque, r
 
 Lista dos requisitos funcionais previstos para o sistema (conforme o relatório de requisitos):
 
-* [ ] RF01. Cadastro de produtos (nome, código, categoria, preço, fornecedor, quantidade disponível, estoque mínimo).
+* [x] RF01. Cadastro de produtos (nome, código, categoria, preço, fornecedor, quantidade disponível, estoque mínimo).
 * [x] RF02. Listagem de produtos com ordenação e busca (usando DataTables.js).
-* [ ] RF03. Edição e exclusão de produtos.
+* [x] RF03. Edição e exclusão de produtos.
 * [ ] RF04. Registro de entradas de estoque.
 * [ ] RF05. Registro de saídas de estoque (venda, perda).
 * [x] RF06. Alerta visual de estoque baixo (na listagem de produtos).
