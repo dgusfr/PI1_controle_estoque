@@ -41,7 +41,7 @@ Lista dos requisitos funcionais previstos para o sistema (conforme o relatório 
 * [x] RF04. Registro de entradas de estoque.
 * [x] RF05. Registro de saídas de estoque (venda, perda).
 * [x] RF06. Alerta visual de estoque baixo (na listagem de produtos).
-* [ ] RF07. Registro de vendas (produtos vendidos, quantidade, valor final).
+* [x] RF07. Registro de vendas (produtos vendidos, quantidade, valor final).
 * [ ] RF08. Cálculo automático do troco.
 * [ ] RF09. Geração de comprovante de venda em PDF.
 * [x] RF10. Cadastro de categorias e fornecedores.
