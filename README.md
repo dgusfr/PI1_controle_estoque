@@ -291,5 +291,5 @@ Este projeto é para fins educacionais, desenvolvido no contexto de uma discipli
 
 ## 12. Autor
 
-Desenvolvido por Diego
+Desenvolvido por Diego Franco.
 Orientação/Contexto: Disciplina de Projeto Integrador 1
