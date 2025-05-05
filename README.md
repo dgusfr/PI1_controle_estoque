@@ -38,7 +38,7 @@ Lista dos requisitos funcionais previstos para o sistema (conforme o relatório 
 * [x] RF01. Cadastro de produtos (nome, código, categoria, preço, fornecedor, quantidade disponível, estoque mínimo).
 * [x] RF02. Listagem de produtos com ordenação e busca (usando DataTables.js).
 * [x] RF03. Edição e exclusão de produtos.
-* [ ] RF04. Registro de entradas de estoque.
+* [x] RF04. Registro de entradas de estoque.
 * [ ] RF05. Registro de saídas de estoque (venda, perda).
 * [x] RF06. Alerta visual de estoque baixo (na listagem de produtos).
 * [ ] RF07. Registro de vendas (produtos vendidos, quantidade, valor final).
