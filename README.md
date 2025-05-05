@@ -24,7 +24,8 @@
 
 ## 1. Sobre o Projeto
 
-Este projeto é um sistema web simples para controle de caixa e estoque, desenvolvido em Python utilizando o framework Flask. Ele foi criado como parte de uma disciplina de projetos, com o objetivo de aplicar conceitos de desenvolvimento web, bancos de dados (ORM) e gestão de projetos.
+Este projeto é um sistema web simples para controle de caixa e estoque, desenvolvido em Python utilizando o framework Flask. 
+Ele foi criado como parte de uma disciplina de projetos, com o objetivo de aplicar conceitos de desenvolvimento web, bancos de dados (ORM) e gestão de projetos.
 
 O sistema permitirá gerenciar produtos, registrar movimentações de estoque, realizar vendas, calcular troco e gerar relatórios básicos.
 
